@@ -1,0 +1,40 @@
+{
+  "name": "app-verk/api-test-cases",
+  "description": "Test cases for boost up writing PHPUnit tests for API with Symfony 3 framework",
+  "type": "symfony-bundle",
+  "authors": [
+    {
+      "name": "Michał Jędraszczyk",
+      "email": "m.jedrasz@gmail.com"
+    }
+  ],
+  "keywords": [
+    "phpunit",
+    "test cases",
+    "api cases"
+  ],
+  "license": [
+    "MIT"
+  ],
+  "require": {
+    "php": "^7.0",
+    "symfony/symfony": "3.3.*",
+    "sensio/framework-extra-bundle": "^3.0.2",
+
+  },
+  "require-dev": {
+    "coduo/php-matcher": "^2.1",
+    "doctrine/data-fixtures": "^1.2",
+    "guzzlehttp/guzzle": "^5.0",
+    "hautelook/alice-bundle": "^1.4",
+    "phpspec/php-diff": "^1.1",
+    "phpunit/phpunit": "^6.2",
+    "polishsymfonycommunity/symfony-mocker-container": "^1.0",
+    "symfony/phpunit-bridge": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AppVerk\\ApiTestCasesBundle\\": ""
+    }
+  }
+}
