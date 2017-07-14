@@ -19,7 +19,9 @@
   "require": {
     "php": "^7.0",
     "symfony/symfony": "3.3.*",
-    "sensio/framework-extra-bundle": "^3.0.2"
+    "sensio/framework-extra-bundle": "^3.0.2",
+    "doctrine/doctrine-bundle": "^1.6",
+    "doctrine/orm": "^2.5"
 
   },
   "require-dev": {

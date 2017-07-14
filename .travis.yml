@@ -1,0 +1,79 @@
+# Project language
+language: php
+
+# Allows use container-based infrastructure
+sudo: true
+
+# Start mysql service
+services:
+  - mysql
+
+# Cache composer packages so "composer install" is faster
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+# Matrix to test in every php version
+matrix:
+  # Fast finish allows to set the build as "finished" even if the "allow_failures" matrix elements are not finished yet.
+  fast_finish: true
+  include:
+    - php: 7.0
+    - php: 5.6
+
+# Define an environment variable
+env:
+  global:
+      # Set build specific variables ...
+      - SOURCE_DIR=src
+      - VHOST_FILE=.travis.vhost
+      - VHOST_CONF=travis.conf
+      - VHOST_URL=travis.dev
+      - SYMFONY_VERSION="3.3.*" DB=mysql
+
+# Install composer dependencies,
+# Create database, schema and fixtures
+
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  # enable php-fpm
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/www.conf
+  - sudo a2enmod rewrite actions fastcgi alias
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  # Disable Xdebug ...
+  - phpenv config-rm xdebug.ini
+  # Configure application's virtual host ...
+  - sudo cp -f $VHOST_FILE /etc/apache2/sites-available/$VHOST_CONF
+  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/$VHOST_CONF
+  - sudo sed -e "s?%VHOST_URL%?$VHOST_URL?g" --in-place /etc/apache2/sites-available/$VHOST_CONF
+  - echo "127.0.0.1       $VHOST_URL" | sudo tee -a /etc/hosts
+  - sudo a2enmod rewrite
+  - sudo a2ensite $VHOST_CONF
+  - sudo service apache2 restart
+  # Set application parameters ...
+  - cp test/app/config/parameters.yml.dist test/app/config/parameters.yml
+  # Composer install ...
+  - travis_retry composer install --no-interaction
+  # Remove application cache and logs ...
+  - rm -Rf var/cache/*
+  - rm -Rf var/logs/*
+  # Prepare application cache ...
+  - php bin/console cache:warm --env=test
+  # Grant application cache and logs permissions ...
+  - chmod -Rf 777 var/cache/
+  - chmod -Rf 777 var/logs/
+  # Install application assets ...
+  - php bin/console doctrine:database:create --env=test
+
+
+# After a build, send email notification with the build results
+notifications:
+    email: false
+
+script:
+  - ./vendor/bin/phpunit --configuration phpunit.xml.dist
+
+install: true
