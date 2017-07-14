@@ -1,9 +1,9 @@
 defult_get:
     path: /default/get
-    defaults: {_controller: AppVerkApiTestCaseBundle:DefaultController:get}
+    defaults: {_controller: AppVerkApiTestCasesBundle:Default:get}
     methods: [GET]
 
 defult_post:
     path: /default/post
-    defaults: {_controller: AppVerkApiTestCaseBundle:DefaultController:post}
+    defaults: {_controller: AppVerkApiTestCasesBundle:Default:post}
     methods: [POST]

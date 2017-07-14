@@ -1,13 +1,12 @@
 <?php
 
-namespace AppVerk\ApiTestCasesBundle\test\Controller;
+namespace AppVerk\ApiTestCasesBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DefaultController extends Controller
 {
-
     public function getAction()
     {
         return new JsonResponse(['data' => 'get']);
