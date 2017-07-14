@@ -61,12 +61,12 @@ before_script:
   - rm -Rf var/cache/*
   - rm -Rf var/logs/*
   # Prepare application cache ...
-  - php bin/console cache:warm --env=test
+  - php test/bin/console cache:warm --env=test
   # Grant application cache and logs permissions ...
   - chmod -Rf 777 var/cache/
   - chmod -Rf 777 var/logs/
   # Install application assets ...
-  - php bin/console doctrine:database:create --env=test
+  - php test/bin/console doctrine:database:create --env=test
 
 
 # After a build, send email notification with the build results
