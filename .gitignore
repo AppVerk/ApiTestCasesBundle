@@ -1,6 +1,12 @@
 /vendor/
 /composer.lock
 /phpunit.xml
-/var
+/var/*
 /test/var
 /test/app/config/parameters.yml
+!/var/cache
+!/var/cache/*
+!var/cache/.gitkeep
+!/var/logs
+/var/logs/*
+!var/logs/.gitkeep
