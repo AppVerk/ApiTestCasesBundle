@@ -57,13 +57,13 @@ before_script:
   # Composer install ...
   - travis_retry composer install --no-interaction
   # Remove application cache and logs ...
-  - rm -Rf var/cache/*
-  - rm -Rf var/logs/*
+  - rm -Rf test/var/cache/*
+  - rm -Rf test/var/logs/*
   # Prepare application cache ...
   - php test/bin/console cache:warm --env=test
   # Grant application cache and logs permissions ...
-  - chmod -Rf 777 var/cache/
-  - chmod -Rf 777 var/logs/
+  - chmod -Rf 777 test/var/cache/
+  - chmod -Rf 777 test/var/logs/
   # Install application assets ...
   - php test/bin/console doctrine:database:create --env=test
 
