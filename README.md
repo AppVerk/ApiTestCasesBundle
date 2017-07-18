@@ -1,4 +1,6 @@
 # ApiTestCasesBundle
+[![Build Status](https://travis-ci.org/AppVerk/ApiTestCasesBundle.svg?branch=master)](https://travis-ci.org/AppVerk/ApiTestCasesBundle)
+
 Test cases for boost up writing PHPUnit functional tests for API with Symfony framework.
 Bundle is helping you debuging failed tests and bosting TDD process.
 
