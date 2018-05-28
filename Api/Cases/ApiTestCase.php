@@ -4,7 +4,9 @@ namespace AppVerk\ApiTestCasesBundle\Api\Cases;
 
 use Coduo\PHPMatcher\Matcher;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Message\AbstractMessage;
@@ -12,6 +14,7 @@ use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Subscriber\History;
 use Nelmio\Alice\Fixtures;
 use Nelmio\Alice\Persister\Doctrine;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -36,23 +39,22 @@ abstract class ApiTestCase extends WebTestCase
      * @var Client
      */
     protected $client;
+
     /**
      * @var string
      */
     protected $dataFixturesPath;
-    protected $entityManager;
+
     /**
      * @var string
      */
     protected $expectedResponsesPath;
-    /**
-     * @var Fixtures
-     */
-    private $fixtureLoader;
+
     /**
      * @var ConsoleOutput
      */
     private $output;
+
     /**
      * @var FormatterHelper
      */
@@ -97,9 +99,6 @@ abstract class ApiTestCase extends WebTestCase
     public function setUpDatabase()
     {
         if (isset($_SERVER['IS_DOCTRINE_ORM_SUPPORTED']) && $_SERVER['IS_DOCTRINE_ORM_SUPPORTED']) {
-            $this->entityManager = $this->getService('doctrine.orm.entity_manager');
-            $this->entityManager->getConnection()->connect();
-            $this->fixtureLoader = new Fixtures(new Doctrine($this->getEntityManager()), [], []);
             $this->purgeDatabase();
         }
     }
@@ -118,10 +117,26 @@ abstract class ApiTestCase extends WebTestCase
         return $this->getService('doctrine.orm.entity_manager');
     }
 
+    protected function getManager($name = null)
+    {
+        return $this->getDoctrine()->getManager($name);
+    }
+
+    /**
+     * @return RegistryInterface
+     */
+    private function getDoctrine()
+    {
+        return $this->getService('doctrine');
+    }
+
     private function purgeDatabase()
     {
-        $purger = new ORMPurger($this->getService('doctrine')->getManager());
-        $purger->purge();
+        /** @var EntityManagerInterface $manager */
+        foreach ($this->getDoctrine()->getManagers() as $manager) {
+            $purger = new ORMPurger($manager);
+            $purger->purge();
+        }
     }
 
     /**
@@ -273,7 +288,7 @@ abstract class ApiTestCase extends WebTestCase
      *
      * @return array
      */
-    protected function loadFixturesFromDirectory($source = '')
+    protected function loadFixturesFromDirectory($source = '', $managerName = null)
     {
         $source = $this->getFixtureRealPath($source);
         $this->assertSourceExists($source);
@@ -287,7 +302,7 @@ abstract class ApiTestCase extends WebTestCase
             $files[] = $file->getRealPath();
         }
 
-        return $this->getFixtureLoader()->loadFiles($files);
+        return $this->getFixtureLoader($managerName)->loadFiles($files);
     }
 
     /**
@@ -349,13 +364,9 @@ abstract class ApiTestCase extends WebTestCase
     /**
      * @return Fixtures
      */
-    protected function getFixtureLoader()
+    protected function getFixtureLoader($managerName = null)
     {
-        if (null === $this->fixtureLoader) {
-            throw new \RuntimeException('Please, set up a database before you will try to use a fixture loader');
-        }
-
-        return $this->fixtureLoader;
+        return new Fixtures(new Doctrine($this->getManager($managerName)), [], []);
     }
 
     /**
@@ -363,12 +374,12 @@ abstract class ApiTestCase extends WebTestCase
      *
      * @return array
      */
-    protected function loadFixturesFromFile($source)
+    protected function loadFixturesFromFile($source, $managerName = null)
     {
         $source = $this->getFixtureRealPath($source);
         $this->assertSourceExists($source);
 
-        return $this->getFixtureLoader()->loadFiles($source);
+        return $this->getFixtureLoader($managerName)->loadFiles($source);
     }
 
     /**
