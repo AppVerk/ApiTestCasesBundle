@@ -18,17 +18,17 @@ matrix:
   # Fast finish allows to set the build as "finished" even if the "allow_failures" matrix elements are not finished yet.
   fast_finish: true
   include:
-    - php: 7.0
+    - php: 7.2
 
 # Define an environment variable
 env:
   global:
-      # Set build specific variables ...
-      - SOURCE_DIR=src
-      - VHOST_FILE=.travis.vhost
-      - VHOST_CONF=travis.conf
-      - VHOST_URL=travis.dev
-      - SYMFONY_VERSION="3.3.*" DB=mysql
+    # Set build specific variables ...
+    - SOURCE_DIR=src
+    - VHOST_FILE=.travis.vhost
+    - VHOST_CONF=travis.conf
+    - VHOST_URL=travis.dev
+    - SYMFONY_VERSION="4.2.*" DB=mysql
 
 # Install composer dependencies,
 # Create database, schema and fixtures
@@ -72,7 +72,7 @@ before_script:
 
 # After a build, send email notification with the build results
 notifications:
-    email: false
+  email: false
 
 script:
   - ./vendor/bin/phpunit --configuration phpunit.xml.dist
