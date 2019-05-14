@@ -4,7 +4,6 @@ namespace AppVerk\ApiTestCasesBundle\Api\Cases;
 
 use Coduo\PHPMatcher\Matcher;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
@@ -12,8 +11,7 @@ use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Message\AbstractMessage;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Subscriber\History;
-use Nelmio\Alice\Fixtures;
-use Nelmio\Alice\Persister\Doctrine;
+use Nelmio\Alice\Loader\SimpleFilesLoader;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Helper\FormatterHelper;
@@ -60,7 +58,10 @@ abstract class ApiTestCase extends WebTestCase
      */
     private $formatterHelper;
 
-    public static function setUpBeforeClass()
+    /** @var SimpleFilesLoader */
+    private $fileLoader;
+
+    public static function setUpBeforeClass() : void
     {
         $baseUrl = getenv('TEST_BASE_URL');
         self::$staticClient = new Client(
@@ -89,7 +90,7 @@ abstract class ApiTestCase extends WebTestCase
         self::bootKernel();
     }
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->client = self::$staticClient;
 
@@ -142,12 +143,12 @@ abstract class ApiTestCase extends WebTestCase
     /**
      * Clean up Kernel usage in this test.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         // purposefully not calling parent class, which shuts down the kernel
     }
 
-    protected function onNotSuccessfulTest(Throwable $e)
+    protected function onNotSuccessfulTest(Throwable $e): void
     {
         if (self::$history && $lastResponse = self::$history->getLastResponse()) {
             $this->printDebug('');
@@ -288,7 +289,7 @@ abstract class ApiTestCase extends WebTestCase
      *
      * @return array
      */
-    protected function loadFixturesFromDirectory($source = '', $managerName = null)
+    protected function loadFixturesFromDirectory($source = '')
     {
         $source = $this->getFixtureRealPath($source);
         $this->assertSourceExists($source);
@@ -302,7 +303,7 @@ abstract class ApiTestCase extends WebTestCase
             $files[] = $file->getRealPath();
         }
 
-        return $this->getFixtureLoader($managerName)->loadFiles($files);
+        return $this->getFixtureLoader()->loadFiles($files)->getObjects();
     }
 
     /**
@@ -362,11 +363,20 @@ abstract class ApiTestCase extends WebTestCase
     }
 
     /**
-     * @return Fixtures
+     * @param SimpleFilesLoader $simpleFilesLoader
+     * @required
      */
-    protected function getFixtureLoader($managerName = null)
+    public function setSimpleFilesLoader(SimpleFilesLoader $simpleFilesLoader)
     {
-        return new Fixtures(new Doctrine($this->getManager($managerName)), [], []);
+        $this->fileLoader = $simpleFilesLoader;
+    }
+
+    /**
+     * @return SimpleFilesLoader
+     */
+    protected function getFixtureLoader()
+    {
+        return $this->fileLoader;
     }
 
     /**
@@ -374,12 +384,12 @@ abstract class ApiTestCase extends WebTestCase
      *
      * @return array
      */
-    protected function loadFixturesFromFile($source, $managerName = null)
+    protected function loadFixturesFromFile($source)
     {
         $source = $this->getFixtureRealPath($source);
         $this->assertSourceExists($source);
 
-        return $this->getFixtureLoader($managerName)->loadFiles($source);
+        return $this->getFixtureLoader()->loadFiles([$source])->getObjects();
     }
 
     /**
