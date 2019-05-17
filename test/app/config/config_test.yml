@@ -7,6 +7,7 @@ framework:
         resource: '%kernel.project_dir%/test/app/config/routing.yml'
         strict_requirements: ~
     validation: { enable_annotations: true }
+    test: true
 # Doctrine Configuration
 doctrine:
     dbal:

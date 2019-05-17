@@ -9,14 +9,25 @@ class DefaultControllerTest extends JsonApiTestCase
 {
     public function testGetRouteExists()
     {
-        $response = $this->client->get('/default/get');
+        $this->client->request('GET', '/default/get');
+        /** @var Response $response */
+        $response = $this->client->getResponse();
 
         $this->assertResponse($response, 'getResponse', Response::HTTP_OK);
     }
 
     public function testPostRouteExists()
     {
-        $response = $this->client->post('/default/post', ['body' => []]);
+        $this->client->request(
+            'POST',
+            '/default/post',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([])
+        );
+        /** @var Response $response */
+        $response = $this->client->getResponse();
 
         $this->assertResponse($response, 'postResponse', Response::HTTP_OK);
     }

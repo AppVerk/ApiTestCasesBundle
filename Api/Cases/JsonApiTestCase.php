@@ -2,7 +2,7 @@
 
 namespace AppVerk\ApiTestCasesBundle\Api\Cases;
 
-use GuzzleHttp\Message\ResponseInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class JsonApiTestCase extends ApiTestCase
 {
@@ -11,11 +11,11 @@ abstract class JsonApiTestCase extends ApiTestCase
      * If filename is set, asserts that response content matches the one in given file.
      * If statusCode is set, asserts that response has given status code.
      *
-     * @param ResponseInterface $response
+     * @param Response $response
      * @param string|null $filename
      * @param int|null $statusCode
      */
-    protected function assertResponse(ResponseInterface $response, $filename, $statusCode = 200)
+    protected function assertResponse(Response $response, $filename, $statusCode = 200)
     {
         $this->assertResponseCode($response, $statusCode);
         $this->assertJsonHeader($response, $statusCode);
@@ -23,18 +23,18 @@ abstract class JsonApiTestCase extends ApiTestCase
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param Response $response
      * @param int $statusCode
      */
-    protected function assertResponseCode(ResponseInterface $response, $statusCode)
+    protected function assertResponseCode(Response $response, $statusCode)
     {
         self::assertEquals($statusCode, $response->getStatusCode());
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param Response $response
      */
-    private function assertJsonHeader(ResponseInterface $response, $statusCode)
+    private function assertJsonHeader(Response $response, $statusCode)
     {
         $contentType = 'application/json';
         if ($statusCode >= 400) {
@@ -46,14 +46,14 @@ abstract class JsonApiTestCase extends ApiTestCase
     /**
      * Asserts that response has JSON content matching the one given in file.
      *
-     * @param ResponseInterface $response
+     * @param Response $response
      * @param string $filename
      *
      * @throws \Exception
      */
-    private function assertJsonResponseContent(ResponseInterface $response, $filename)
+    private function assertJsonResponseContent(Response $response, $filename)
     {
-        parent::assertResponseContent($this->prettifyJson($response->getBody()), $filename, 'json');
+        parent::assertResponseContent($this->prettifyJson($response->getContent()), $filename, 'json');
     }
 
     /**

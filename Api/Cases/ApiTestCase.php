@@ -6,8 +6,8 @@ use Coduo\PHPMatcher\Matcher;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Event\BeforeEvent;
+use Symfony\Bundle\FrameworkBundle\Client;
+use Fidry\AliceDataFixtures\Loader\PurgerLoader;
 use GuzzleHttp\Message\AbstractMessage;
 use GuzzleHttp\Message\ResponseInterface;
 use GuzzleHttp\Subscriber\History;
@@ -18,6 +18,7 @@ use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 abstract class ApiTestCase extends WebTestCase
@@ -58,34 +59,17 @@ abstract class ApiTestCase extends WebTestCase
      */
     private $formatterHelper;
 
-    /** @var SimpleFilesLoader */
-    private $fileLoader;
+    /** @var PurgerLoader */
+    private $loader;
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+    }
 
     public static function setUpBeforeClass() : void
     {
-        $baseUrl = getenv('TEST_BASE_URL');
-        self::$staticClient = new Client(
-            [
-                'base_url' => $baseUrl,
-                'defaults' => [
-                    'exceptions' => false,
-                ],
-            ]
-        );
-        self::$history = new History();
-        self::$staticClient->getEmitter()
-            ->attach(self::$history);
-
-        self::$staticClient->getEmitter()
-            ->on(
-                'before',
-                function (BeforeEvent $event) {
-                    $path = $event->getRequest()->getPath();
-                    if (strpos($path, '/app_test.php') === false) {
-                        $event->getRequest()->setPath('/app_test.php'.$path);
-                    }
-                }
-            );
+        self::$staticClient = static::createClient();
 
         self::bootKernel();
     }
@@ -189,10 +173,10 @@ abstract class ApiTestCase extends WebTestCase
         }
     }
 
-    protected function debugResponse(ResponseInterface $response)
+    protected function debugResponse(Response $response)
     {
         $this->printDebug(AbstractMessage::getStartLineAndHeaders($response));
-        $body = (string)$response->getBody();
+        $body = (string)$response->getContent();
 
         $contentType = $response->getHeader('Content-Type');
         if ($contentType == 'application/json' || strpos($contentType, '+json') !== false) {
@@ -303,7 +287,7 @@ abstract class ApiTestCase extends WebTestCase
             $files[] = $file->getRealPath();
         }
 
-        return $this->getFixtureLoader()->loadFiles($files)->getObjects();
+        return $this->getFixtureLoader()->load($files);
     }
 
     /**
@@ -363,20 +347,15 @@ abstract class ApiTestCase extends WebTestCase
     }
 
     /**
-     * @param SimpleFilesLoader $simpleFilesLoader
-     * @required
-     */
-    public function setSimpleFilesLoader(SimpleFilesLoader $simpleFilesLoader)
-    {
-        $this->fileLoader = $simpleFilesLoader;
-    }
-
-    /**
-     * @return SimpleFilesLoader
+     * @return PurgerLoader
      */
     protected function getFixtureLoader()
     {
-        return $this->fileLoader;
+        if (!$this->loader) {
+            $this->loader = self::$container->get('fidry_alice_data_fixtures.loader.doctrine');
+        }
+
+        return $this->loader;
     }
 
     /**
@@ -389,18 +368,18 @@ abstract class ApiTestCase extends WebTestCase
         $source = $this->getFixtureRealPath($source);
         $this->assertSourceExists($source);
 
-        return $this->getFixtureLoader()->loadFiles([$source])->getObjects();
+        return $this->getFixtureLoader()->load([$source]);
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param Response $response
      * @param string $contentType
      */
-    protected function assertHeader(ResponseInterface $response, $contentType)
+    protected function assertHeader(Response $response, $contentType)
     {
         self::assertTrue(
-            ($response->getHeader('Content-Type') == $contentType),
-            $response->getHeader('Content-Type')
+            ($response->headers->get('Content-Type') == $contentType),
+            $response->headers->get('Content-Type')
         );
     }
 
@@ -416,6 +395,7 @@ abstract class ApiTestCase extends WebTestCase
         $expectedResponse = trim(
             file_get_contents(PathBuilder::build($responseSource, sprintf('%s.%s', $filename, $mimeType)))
         );
+
         $matcher = $this->buildMatcher();
         if ($actualResponse != 'null') {
             $result = $matcher->match($actualResponse, $expectedResponse);
