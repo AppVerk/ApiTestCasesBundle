@@ -23,7 +23,7 @@
     "sensio/framework-extra-bundle": "^5.3",
     "hautelook/alice-bundle": "^2.5",
     "phpspec/php-diff": "^1.1",
-    "phpunit/phpunit": "^6.2",
+    "phpunit/phpunit": "^6.2|^8.3",
     "polishsymfonycommunity/symfony-mocker-container": "^1.0",
     "symfony/phpunit-bridge": "^4.2",
     "guzzlehttp/guzzle": "^5.0"
