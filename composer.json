@@ -21,14 +21,13 @@
     "coduo/php-matcher": "3.1.*",
     "symfony/orm-pack": "*",
     "sensio/framework-extra-bundle": "^5.3",
-    "theofidry/alice-bundle": "dev-master",
+    "appverk/alice-bundle": "dev-legacy",
     "phpspec/php-diff": "^1.1",
     "phpunit/phpunit": "^6.2 || ^8.3",
     "polishsymfonycommunity/symfony-mocker-container": "^1.0",
     "symfony/phpunit-bridge": "^4.2",
     "guzzlehttp/guzzle": "^5.0 || ^6.0 || ^7.0"
   },
-
   "autoload": {
     "psr-4": {
       "AppVerk\\ApiTestCasesBundle\\": ""
@@ -36,8 +35,16 @@
   },
   "repositories": [
     {
-      "type": "vcs",
-      "url": "https://github.com/theofidry/AliceBundle"
+      "type": "package",
+      "package": {
+        "version": "dev-legacy",
+        "name": "appverk/alice-bundle",
+        "source": {
+          "url": "git@github.com:AppVerk/AliceDataFixtures.git",
+          "type": "git",
+          "reference": "legacy"
+        }
+      }
     }
   ]
 }
