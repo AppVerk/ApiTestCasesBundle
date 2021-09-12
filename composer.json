@@ -21,7 +21,7 @@
     "coduo/php-matcher": "3.1.*",
     "symfony/orm-pack": "*",
     "sensio/framework-extra-bundle": "^5.3",
-    "appverk/alice-bundle": "dev-master",
+    "appverk/alice-bundle": "1.4.1",
     "phpspec/php-diff": "^1.1",
     "phpunit/phpunit": "^6.2 || ^8.3",
     "polishsymfonycommunity/symfony-mocker-container": "^1.0",
@@ -35,16 +35,8 @@
   },
   "repositories": [
     {
-      "type": "package",
-      "package": {
-        "version": "dev-master",
-        "name": "appverk/alice-bundle",
-        "source": {
-          "url": "git@github.com:AppVerk/AliceDataFixtures.git",
-          "type": "git",
-          "reference": "master"
-        }
-      }
+      "type": "vcs",
+      "url": "git@github.com:AppVerk/AliceDataFixtures.git"
     }
   ]
 }
