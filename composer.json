@@ -21,7 +21,7 @@
     "coduo/php-matcher": "3.1.*",
     "symfony/orm-pack": "*",
     "sensio/framework-extra-bundle": "^5.3",
-    "appverk/alice-bundle": "*",
+    "app-verk/alice-bundle": "*",
     "phpspec/php-diff": "^1.1",
     "phpunit/phpunit": "^6.2 || ^8.3",
     "polishsymfonycommunity/symfony-mocker-container": "^1.0",
