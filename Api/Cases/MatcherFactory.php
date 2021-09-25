@@ -5,6 +5,7 @@ namespace AppVerk\ApiTestCasesBundle\Api\Cases;
 use Coduo\PHPMatcher\Lexer;
 use Coduo\PHPMatcher\Matcher;
 use Coduo\PHPMatcher\Parser;
+use Coduo\PHPMatcher\Backtrace;
 
 class MatcherFactory
 {
@@ -25,12 +26,14 @@ class MatcherFactory
     {
         $orMatcher = self::buildOrMatcher();
         $chainMatcher = new Matcher\ChainMatcher(
+            'chain',
+            new Backtrace\InMemoryBacktrace(),
             [
-                new $matcherClass($orMatcher),
+                new $matcherClass($orMatcher, new Backtrace\InMemoryBacktrace()),
             ]
         );
 
-        return new Matcher($chainMatcher);
+        return new Matcher($chainMatcher, new Backtrace\InMemoryBacktrace());
     }
 
     /**
@@ -39,24 +42,29 @@ class MatcherFactory
     protected static function buildOrMatcher()
     {
         $scalarMatchers = self::buildScalarMatchers();
-        $orMatcher = new Matcher\OrMatcher($scalarMatchers);
+        $orMatcher = new Matcher\OrMatcher(new Backtrace\InMemoryBacktrace(), $scalarMatchers);
         $arrayMatcher = new Matcher\ArrayMatcher(
             new Matcher\ChainMatcher(
+                'chain',
+                new Backtrace\InMemoryBacktrace(),
                 [
                     $orMatcher,
                     $scalarMatchers,
                 ]
             ),
+            new Backtrace\InMemoryBacktrace(),
             self::buildParser()
         );
         $chainMatcher = new Matcher\ChainMatcher(
+            'chain',
+            new Backtrace\InMemoryBacktrace(),
             [
                 $orMatcher,
                 $arrayMatcher,
             ]
         );
 
-        return $chainMatcher;
+        return $arrayMatcher;
     }
 
     /**
@@ -65,19 +73,22 @@ class MatcherFactory
     protected static function buildScalarMatchers()
     {
         $parser = self::buildParser();
+        $InMemoryBacktrace = new Backtrace\InMemoryBacktrace();
 
         return new Matcher\ChainMatcher(
+            'chain',
+            $InMemoryBacktrace,
             [
-                new Matcher\CallbackMatcher(),
-                new Matcher\ExpressionMatcher(),
-                new Matcher\NullMatcher(),
-                new Matcher\StringMatcher($parser),
-                new Matcher\IntegerMatcher($parser),
-                new Matcher\BooleanMatcher($parser),
-                new Matcher\DoubleMatcher($parser),
-                new Matcher\NumberMatcher($parser),
-                new Matcher\ScalarMatcher(),
-                new Matcher\WildcardMatcher(),
+                new Matcher\CallbackMatcher($InMemoryBacktrace),
+                new Matcher\ExpressionMatcher($InMemoryBacktrace),
+                new Matcher\NullMatcher($InMemoryBacktrace),
+                new Matcher\StringMatcher($InMemoryBacktrace, $parser),
+                new Matcher\IntegerMatcher($InMemoryBacktrace, $parser),
+                new Matcher\BooleanMatcher($InMemoryBacktrace, $parser),
+                new Matcher\DoubleMatcher($InMemoryBacktrace, $parser),
+                new Matcher\NumberMatcher($InMemoryBacktrace, $parser),
+                new Matcher\ScalarMatcher($InMemoryBacktrace),
+                new Matcher\WildcardMatcher($InMemoryBacktrace),
             ]
         );
     }
@@ -87,7 +98,7 @@ class MatcherFactory
      */
     protected static function buildParser()
     {
-        return new Parser(new Lexer(), new Parser\ExpanderInitializer());
+        return new Parser(new Lexer(), new Parser\ExpanderInitializer(new Backtrace\InMemoryBacktrace()));
     }
 
     /**
