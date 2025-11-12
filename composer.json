@@ -17,7 +17,7 @@
     "MIT"
   ],
   "require": {
-    "php": "^7.2",
+    "php": "^7.2 || ^8.0",
     "coduo/php-matcher": "3.1.* || 6.*",
     "symfony/orm-pack": "*",
     "sensio/framework-extra-bundle": "^5.3",
@@ -25,7 +25,7 @@
     "phpspec/php-diff": "^1.1",
     "phpunit/phpunit": "^6.2 || ^8.3",
     "polishsymfonycommunity/symfony-mocker-container": "^1.0",
-    "symfony/phpunit-bridge": "^4.2",
+    "symfony/phpunit-bridge": "^4.2 || ^5.4",
     "guzzlehttp/guzzle": "^5.0 || ^6.0 || ^7.0"
   },
   "autoload": {
